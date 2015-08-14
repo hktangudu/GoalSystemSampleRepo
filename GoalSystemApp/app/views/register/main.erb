@@ -1,0 +1,418 @@
+<head >
+
+<style>
+  #myModal{
+    width: 400px;
+    height: 500px;
+  }
+
+  .modal-header .close {
+      background-color: #5cb85c;
+      color:white !important;
+          font-size: 20px;
+          
+  }
+  .modal-header{
+    background-color: #5cb85c;
+    width: 400px;
+  }
+
+   .modal-footer {
+      background-color: #f9f9f9;
+      width: 400px;
+  }
+  #goaltable {
+    margin-top: 30px
+  }
+  .btn-default {
+    background-color: #5cb85c;
+    width:70px;
+
+  }
+  .input-md{
+    
+  }
+</style>
+
+
+<script >
+$(document).ready(function(){
+// $(".datepicker").datepicker({inline:true,daysOfWeekDisabled: "1,3,6"}); 
+
+
+
+$("#cp").click(function(event)
+{
+  $('#myModal').modal({backdrop: false});
+    
+});
+
+
+$("#Ok").click(function(){
+        data = $('.password').val();
+        var len = data.length;
+        
+        if(len < 1) {
+            alert("Password cannot be blank");
+            // Prevent form submission
+            event.preventDefault();
+        }
+         
+        else if($('.password').val() != $('.confpass').val()) 
+        {
+            alert("Password and Confirm are Password not matching");
+            // Prevent form submission
+            event.preventDefault();
+        }
+        else
+        {
+          $('.cpform').submit();
+        }
+});
+
+
+      // Add Goal Table logic
+
+
+
+    $("#tab_logic").on("click","#edit", function()
+    {  
+      var text = $(this).text();
+    
+      if(text.toString() == "update")
+      {
+        $(this).closest("tr").find(":input[type='text']").attr('disabled',true);
+        $(this).closest("tr").find("select").attr('disabled',true);
+        $(this).closest("tr").find("#remarks").attr('disabled',true);
+        $(this).closest("tr").find("#goals").attr('disabled',true);
+        $(this).text("Edit");
+        var value = $(this).closest("tr").find("#goals").val();
+        
+        $.ajax({ 
+                  type: 'POST', 
+                  url: '/register/updategoal', 
+                  // data: {label : $(this).closest("tr").find("#label").val(),goal : $(this).closest("tr").find("#goals").val(), status : $(this).closest("tr").find("#status").val(), remarks : $(this).closest("tr").find("#remarks").val()},
+                  data: {goalid: $(this).closest("tr").find("#goalid").val(), 
+                  label : $(this).closest("tr").find("#label").val(),
+                  goal : $(this).closest("tr").find("#goals").val(), 
+                  status : $(this).closest("tr").find("#status").val(), 
+                  remarks : $(this).closest("tr").find("#remarks").val()},
+                  error: function() {
+                        alert("Ajax error!")
+                      }
+              });
+        // alert(value);
+        // alert($(this).closest("tr").find("#status").val());
+      }
+      else
+      {
+        $(this).closest("tr").find(":input[type='text']").attr('disabled',false);
+        $(this).closest("tr").find("#goalid").attr('disabled',true);
+        $(this).closest("tr").find("#goaladdedon").attr('disabled',true);
+        $(this).closest("tr").find("#goaldoneon").attr('disabled',true);
+        $(this).closest("tr").find("#label").attr('disabled',true);
+        $(this).closest("tr").find("#remarks").attr('disabled',false);
+        $(this).closest("tr").find("#goals").attr('disabled',false);
+        $(this).closest("tr").find("select").attr('disabled',false);
+        $(this).text("update");
+        
+      }
+    });
+
+
+
+    //  Pending Goal Table logic
+
+
+    $('.selectpicker').on('change', function()
+    {
+      // $('select[name=selValue]').val(1);
+      // $('select[name=selValue]').change();
+
+     //     var text = $("select[name=selValue] option[value='1']").text();
+
+          var text = $(this).find("option:selected").val();
+
+          
+           $.ajax({ 
+                type: 'Get', 
+                url: '/register/getallpendinggoals', 
+           //     dataType:"json",
+                // data: {label : $(this).closest("tr").find("#label").val(),goal : $(this).closest("tr").find("#goals").val(), status : $(this).closest("tr").find("#status").val(), remarks : $(this).closest("tr").find("#remarks").val()},
+                success: function(result){
+                  alert(result);
+                },
+                error: function() {
+                      alert("Ajax error!")
+                    }
+            });     
+        
+
+
+    });
+
+
+
+
+
+});
+
+</script>
+</head>
+<body style= "background-image:url(<%= asset_path 'Elegant_Background-2.jpg' %>); background-size:cover; background-repeat:norepeat; height:100%; width:100%" >
+</br>
+<div align="right" style="padding-right:2em; font-weight:bold">Logged In User : <span class="glyphicon glyphicon-user"></span> <%= current_user.name %>
+</div>
+
+<div>
+  <div style="float:left; position:absolute">
+      <a align="left" class="btn btn-link" id="cp" href ="#myModal" >Change Password <span class="glyphicon glyphicon-pencil"></span></a>
+  </div>
+  <div style="float:right; margin-right:25px">
+      <%= button_to('logout' ,action: 'logout',:id => 'signout', class: "btn btn-primary active") do%>Logout
+        <i class="glyphicon glyphicon-log-out"></i>
+      <% end %>
+  </div>
+</div> 
+
+
+<% if flash[:changepassword] %>
+<h4><font color="blue"><%= flash[:changepassword] %></font> <h4>
+<% end %>
+
+
+ </br> 
+ <div class="btn-group" style="margin-top:10px; margin-left:10px" align='left'>
+    <div class="btn-group">
+      <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Dashboard<span class="caret"></span></button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="#">Goals Dashboard</a></li>
+      </ul>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn dropdown-toggle btn-primary " data-toggle="dropdown">
+        Goals<span class="caret"></span></span></button>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#">Daily Goals</a></li>
+          <li><a href="#">LongTerm Goals</a></li>
+          <li><a href="#">Weekly Feedback</a></li>
+          <li><a href="#">Apprisal Form</a></li>
+        </ul>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+        Project Management<span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#">Projects</a></li>
+          <li><a href="#">Section & Item</a></li>
+          <li><a href="#">Items</a></li>
+          <li><a href="#">Build</a></li>
+        </ul>
+    </div>
+  
+    <div class="btn-group">
+      <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+        Knowledge Base<span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#">Tips</a></li>
+        </ul>
+    </div>
+
+ </div>
+
+<hr></hr>
+  <div class="modal" id="myModal" role="dialog" tabindex="-1" aria-hidden="true" style="display: none">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header" >
+          <div style="float:right">
+           <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div float="float:left" style="height: 23px">
+            <h4 class="modal-title" style="color:white !important; margin-left: 5px; margin-top:5px"> Change Password</h4>
+          </div>
+          </div>
+          <div class="modal-body" >
+              <form accept-charset="UTF-8" action="/register/passwordchange" method="post" class="cpform">
+                <table>
+                  <tr>
+                    <td style="font-weight:bold; padding-top: 0.8em; padding-bottom: 0.8em;">Old Password</td>
+                    <td><input type="password" name="user[oldpassword]"></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:bold; padding-top: 0.8em; padding-bottom: 0.8em;">New Password</td>
+                    <td><input class="password" type="password" name="user[password]"></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:bold;padding-top: 0.8em; padding-bottom: 0.8em; padding-right:20px">Confirm Password</td>
+                    <td ><input class="confpass" type="password" name="user[password_confirmation]" ></td>
+                    <input type="hidden" 
+                   value="<%= form_authenticity_token() %>" 
+                   name="authenticity_token"/>
+                  </tr>
+
+                </table>
+              </form>
+          </div>
+          <div class="modal-footer">
+              <p align="right"><button id="Ok" class="btn btn-primary active" style="margin-right:2em">Ok</button>
+                <span><button style="margin-right:2em" type="button" class="btn btn-default active" data-dismiss="modal">Close</button></span></p>
+          </div>
+        </div>
+      </div>
+</div>
+ 
+ <!--  <div class="input-append date datepicker" style="float:left; position:absolute ;margin-left:10px">
+   
+  </div>   --> 
+
+  <!--    Pending Goal code     -->
+
+
+
+    <div class="container horizontal-right"  style=" margin-right:0px" >
+
+
+    <div class="well" style = "width:100%">
+
+          <div style = "float:left; width: 21%;">
+            Select Pending Goal's Time Span : </br>
+          </div>
+
+
+          <div  style = "float:left; width: 20%; " >
+
+   
+              <select  class='selectpicker' style="width:173px ;margin-bottom:0px; " name='status' id='pendingGoals_Timespan'  >
+
+                <option value='All' >All</option>
+                <option value='Yeseterday' selected ='selected'  >Yeseterday</option>
+                <option value='Last week' >Last week</option>
+                <option value='Last One Month' >Last One Month</option>
+                <option value='Last Three Months' >Last Three Months</option>
+                <option value='Last Six Months' >Last Six Months</option>
+              </select>
+
+          </div>
+
+
+          <div style = "float:left; width: 43%;">
+            Total No. Of Pending Goals : 
+          </div>
+
+          <div >
+            <a align="left" class="btn btn-link" id="cp" href ="#myModal" >Your Long Term Goals</a>
+          </div>
+
+
+            <!-- Pending Goals Table header -->
+
+
+        <div style="height:40px;background-color:lightblue;width:1100px auto;" cellpadding="0" cellspacing="0">
+          <table style="background-color:lightblue;width:1100px auto;" cellpadding="0" cellspacing="0">
+            <thead>
+              <tr>
+                <th class="text-center" style="width:55px ;padding-top:10px">#</th>
+                <th class="text-center" style="width:240px ;padding-top:10px; padding-left:100px; ">Pending Goals</th>
+                <th class="text-center" style="width:140px ;padding-top:10px; padding-left:200px; ">Status</th>
+                <th class="text-center" style="width:260px ;padding-top:10px; padding-left:200px; ">Remarks</th>
+       
+                <th class="text-center" style=" padding-top:10px; padding-left:180px; ">Added On</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+
+            <!-- Pending Goals Table  -->
+
+
+        <div style="overflow: auto;">
+          <table class="table table-bordered table-hover" id="tab_pending">
+           
+            <tbody>
+              <% if !@usersallpendinggoals.nil? %> 
+                <% @usersallpendinggoals.each do |goal| %>
+                <tr>
+                  <td style="width:55px"><input  name='goalid'  id='goalid' type='text' placeholder='label' class='form-control input-md' disabled='true' value= <%= goal.id %>></td>
+                  
+                  <td style="width:240px"><textarea  name='goals' id='goals' style='resize:none' type='text' placeholder='goals'  class='form-control input-md' disabled='true' ><%=goal.goal%> </textarea></td>
+                  <td style="width:110px"><input   name='status' id='status' type='text' disabled='true' placeholder='label' class='form-control input-md' value=  <% if goal.status=='New'%> 'New' <% end%> <% if goal.status=='In progress'%> 'In progress' <% end%> <% if goal.status=='Paused'%> 'Paused' <% end%> ></td>
+                  <td style="width:240px"><textarea name='remarks' style='resize:none;' id='remarks' placeholder='remarks'  class='form-control input-md' disabled='true' ><%=goal.remarks%></textarea></td>
+                  
+                  <td style="width:108px"><input style:'padding:0' name='goaladdedon'  id='goaladdedon' type='text' class='form-control input-md' disabled='true' value= <%=goal.created_at %>></td>
+                </tr>
+
+                <% end %>
+              <% end %>
+              <!-- <tr id="addr0"> -->
+            </tbody>
+          </table>
+        </div> 
+    </div>
+  </div>
+
+  
+
+  <!--    Add Goal code     -->
+  
+
+  <div class="container horizontal-right" id="goaltable" style=" margin-right:0px" >
+    <div class="well">
+      <span class="label label-info"><font style="font-weight=bold">Goals : </font></span></br>
+    <%= button_to('addusergoal' ,action: 'addusergoal',:id => 'add_goal', class: "btn btn-primary active", style: "margin-top:2px;margin-bottom:3px") do%>Add
+    <i class="glyphicon glyphicon-plus-sign"></i>
+  <% end %>
+    <div style="height:40px;background-color:lightblue;width:1100px auto;" cellpadding="0" cellspacing="0">
+      <table style="background-color:lightblue;width:1100px auto;" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr>
+            <th class="text-center" style="width:55px ;padding-top:10px">#</th>
+            <th class="text-center" style="width:60px ;padding-top:10px">Label</th>
+            <th class="text-center" style="width:240px ;padding-top:10px">Goals</th>
+            <th class="text-center" style="width:140px ;padding-top:10px">Status</th>
+            <th class="text-center" style="width:260px ;padding-top:10px">Remarks</th>
+   
+            <th class="text-center" style="width:115px ;padding-top:10px">Added On</th>
+            <th class="text-center" style="width:115px ;padding-top:10px">Done On</th>
+            <th class="text-center" style="width:90px ;padding-top:10px">Edit</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+      <div style="overflow: auto;height: 300px;">
+      <table class="table table-bordered table-hover" id="tab_logic">
+       
+        <tbody>
+          <% if !@usergoals.nil? %> 
+            <% @usergoals.each do |goal| %>
+            <tr>
+              <td style="width:55px"><input  name='goalid'  id='goalid' type='text' placeholder='label' class='form-control input-md' disabled='true' value= <%=goal.id %>></td>
+              <td style="width:35px"><input  name='label' <% if goal.status=='Done'%>style='width:20px;background-color:green' <% elsif goal.status=='Paused'%>style='width:45px;background-color:yellow'<%end%>id='label' type='text' class='form-control input-md' disabled='true' value= <%=goal.label%>> </td>
+              <td style="width:240px"><textarea  name='goals' id='goals' style='resize:none' type='text' placeholder='goals'  class='form-control input-md' disabled='true' ><%=goal.goal%> </textarea></td>
+              <td style="width:110px"><select  class='form-control input-md' name='status' id='status' disabled='true' > 
+                <option value='New' <% if goal.status=='New'%>selected ='selected' <% end%>>New</option>
+                <option value='In progress' <% if goal.status=='In progress' %> selected ='selected' <% end%>>In Progress..</option>
+                <option value='Done' <% if goal.status=='Done'%>selected ='selected' <% end%>>Done</option>
+                <option value='Paused' <% if goal.status=='Paused' %>selected ='selected' <% end%>>Paused</option></select></td>
+              <td style="width:240px"><textarea name='remarks' style='resize:none;' id='remarks' placeholder='remarks'  class='form-control input-md' disabled='true' ><%=goal.remarks%></textarea></td>
+              
+              <td style="width:108px"><input style:'padding:0' name='goaladdedon'  id='goaladdedon' type='text' class='form-control input-md' disabled='true' value= <%=goal.created_at %>></td>
+              <td style="width:108px"><input  name='goaldoneon' id='goaldoneon' type='text' class='form-control input-md' disabled='true' value= <%=goal.updated_at %>></td>
+              <td style="width:10px"><button class='btn btn-default' id='edit'> Edit </button></td>
+            </tr>
+
+            <% end %>
+          <% end %>
+          <!-- <tr id="addr0"> -->
+        </tbody>
+      </table>
+    </div>
+    </div>
+  </div>
+
+</body>
